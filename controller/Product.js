@@ -26,7 +26,7 @@ exports.getProductsByFilter = async (req, res) => {
     const page = req.query._page;
     const pageSize = req.query._limit;
     query = query.skip(pageSize * (page - 1)).limit(pageSize);
-    queryCount = queryCount.skip(pageSize * (page - 1)).limit(pageSize);
+    //queryCount = queryCount.skip(pageSize * (page - 1)).limit(pageSize);
   }
   // TODO: sorting by discounted price
   if (req.query._sort && req.query._order) {
