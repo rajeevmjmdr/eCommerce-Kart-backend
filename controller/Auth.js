@@ -16,7 +16,7 @@ exports.checkUser = async (req, res) => {
   try {
     const user = await User.findOne(
       { email: req.body.email, password: req.body.password },
-      " id email name "
+      " id email name role"
     );
     if (user) {
       res.status(201).json(user);

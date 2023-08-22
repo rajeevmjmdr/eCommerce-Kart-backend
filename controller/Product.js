@@ -12,8 +12,12 @@ exports.createProduct = async (req, res) => {
 };
 
 exports.getProductsByFilter = async (req, res) => {
-  let query = Product.find({});
-  let queryCount = Product.find({});
+  let condition={};
+  if(!req.query.admin){
+    condition.deleted = {$ne:true};
+  }
+  let query = Product.find(condition);
+  let queryCount = Product.find(condition);
   if (req.query.category) {
     query = query.find({ category: req.query.category });
     queryCount = queryCount.find({ category: req.query.category });
