@@ -11,9 +11,9 @@ const router = express.Router();
 
 router
   .post("/", createOrder)
-  .get("/user/:userId", getOrdersByUser)
+  .get("/user/", getOrdersByUser)
   .get("/", getAllOrders)
-  .patch("/:id", updateOrder)
+  .patch("/:orderId", updateOrder)
   .delete("/:id", deleteOrder);
 
 exports.router = router;

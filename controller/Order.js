@@ -12,9 +12,9 @@ exports.createOrder = async (req, res) => {
 };
 
 exports.getOrdersByUser = async (req, res) => {
-  const { userId } = req.params;
+  const { id } = req.user;
   try {
-    const orders = await Order.find({ user: userId });
+    const orders = await Order.find({ user: id });
     res.status(200).json(orders);
   } catch (err) {
     res.status(400).json(err);
@@ -22,9 +22,9 @@ exports.getOrdersByUser = async (req, res) => {
 };
 
 exports.updateOrder = async (req, res) => {
-  const { id } = req.params;
+  const { orderId } = req.params;
   try {
-    const doc = await Order.findByIdAndUpdate(id, req.body, { new: true });
+    const doc = await Order.findByIdAndUpdate(orderId, req.body, { new: true });
     res.status(200).json(doc);
   } catch (err) {
     res.status(400).json(err);

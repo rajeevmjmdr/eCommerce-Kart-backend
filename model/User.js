@@ -11,7 +11,7 @@ const userSchema = new Schema({
     unique: true,
   },
   password: {
-    type: String,
+    type: Buffer,
     required: true,
   },
   role: {
@@ -21,6 +21,10 @@ const userSchema = new Schema({
   },
   addresses: {
     type:[Schema.Types.Mixed]
+  },
+  salt: {
+    type: Buffer,
+    required: true,
   },
 });
 

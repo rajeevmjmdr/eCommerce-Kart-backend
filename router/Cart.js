@@ -7,7 +7,7 @@ const router = express.Router();
 router
     .post('/',addToCart)
     .get('/',getCartByUser)
-    .patch('/:id',updateCart)
+    .patch('/',updateCart)
     .delete('/:id',deleteFromCart)
  
 
