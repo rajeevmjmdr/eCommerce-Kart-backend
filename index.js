@@ -27,7 +27,7 @@ opts.jwtFromRequest = cookieExtractor;
 opts.secretOrKey = process.env.SECRET_KEY;
 
 //middleware
-server.use(express.static('build'));
+//server.use(express.static('build'));
 server.use(
   session({
     secret: "keyboard cat",
@@ -79,7 +79,7 @@ passport.use('local',
             });
           } else {
             const token = jwt.sign(sanatizeUser(user), process.env.SECRET_KEY);
-            return done(null, {token});
+            return done(null, {id:user.id,role:user.role});
           }
         }
       );
