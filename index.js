@@ -20,7 +20,65 @@ const orderRouter = require("./router/Order");
 const { User } = require("./model/User");
 const crypto = require("crypto");
 const { sanatizeUser, isAuth , cookieExtractor} = require("./services/Common");
+const morgan = require("morgan");
 
+//Webhook
+// This is your Stripe CLI webhook secret for testing your endpoint locally.
+const endpointSecret = process.env.ENDPOINT_SECRET;
+
+server.post('/webhook', express.raw({type: 'application/json'}), (request, response) => {
+  const sig = request.headers['stripe-signature'];
+
+  let event;
+
+  try {
+    event = stripe.webhooks.constructEvent(request.body, sig, endpointSecret);
+  } catch (err) {
+    response.status(400).send(`Webhook Error: ${err.message}`);
+    return;
+  }
+
+  // Handle the event
+  switch (event.type) {
+    case 'payment_intent.amount_capturable_updated':
+      const paymentIntentAmountCapturableUpdated = event.data.object;
+      // Then define and call a function to handle the event payment_intent.amount_capturable_updated
+      break;
+    case 'payment_intent.canceled':
+      const paymentIntentCanceled = event.data.object;
+      // Then define and call a function to handle the event payment_intent.canceled
+      break;
+    case 'payment_intent.created':
+      const paymentIntentCreated = event.data.object;
+      // Then define and call a function to handle the event payment_intent.created
+      break;
+    case 'payment_intent.partially_funded':
+      const paymentIntentPartiallyFunded = event.data.object;
+      // Then define and call a function to handle the event payment_intent.partially_funded
+      break;
+    case 'payment_intent.payment_failed':
+      const paymentIntentPaymentFailed = event.data.object;
+      // Then define and call a function to handle the event payment_intent.payment_failed
+      break;
+    case 'payment_intent.processing':
+      const paymentIntentProcessing = event.data.object;
+      // Then define and call a function to handle the event payment_intent.processing
+      break;
+    case 'payment_intent.requires_action':
+      const paymentIntentRequiresAction = event.data.object;
+      // Then define and call a function to handle the event payment_intent.requires_action
+      break;
+    case 'payment_intent.succeeded':
+      const paymentIntentSucceeded = event.data.object;
+      // Then define and call a function to handle the event payment_intent.succeeded
+      break;
+    // ... handle other event types
+    default:
+      console.log(`Unhandled event type ${event.type}`);
+  }
+  // Return a 200 response to acknowledge receipt of the event
+  response.send();
+});
 
 const opts = {}
 opts.jwtFromRequest = cookieExtractor;
@@ -28,9 +86,14 @@ opts.secretOrKey = process.env.SECRET_KEY;
 
 //middleware
 //server.use(express.static('build'));
+
+//Using Third-party Middleware -Morgan
+
+server.use(morgan("dev"));
+
 server.use(
   session({
-    secret: "keyboard cat",
+    secret: process.env.SESSION_SECRET_KEY,
     resave: false,
     saveUninitialized: false,
   })
@@ -79,7 +142,7 @@ passport.use('local',
             });
           } else {
             const token = jwt.sign(sanatizeUser(user), process.env.SECRET_KEY);
-            return done(null, {id:user.id,role:user.role});
+            return done(null, {id:user.id,role:user.role,token:token});
           }
         }
       );
@@ -110,17 +173,42 @@ new JwtStrategy(opts, async function(jwt_payload, done) {
 //Passport Serializer && Deserializer 
 passport.serializeUser(function (user, cb) {
   process.nextTick(function () {
-    console.log("in serialize")
+    //console.log("in serialize")
     return cb(null, sanatizeUser(user));
   });
 });
 
 passport.deserializeUser(function (user, cb) {
   process.nextTick(function () {
-    console.log("in Deserialize")
+   // console.log("in Deserialize")
     return cb(null, sanatizeUser(user));
   });
 });
+
+//Payments
+
+// This is your test secret API key.
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+
+server.post("/create-payment-intent", async (req, res) => {
+  const { totalAmount } = req.body;
+
+  // Create a PaymentIntent with the order amount and currency
+  const paymentIntent = await stripe.paymentIntents.create({
+    amount: totalAmount*100,
+    currency: "inr",
+    // In the latest version of the API, specifying the `automatic_payment_methods` parameter is optional because Stripe enables its functionality by default.
+    automatic_payment_methods: {
+      enabled: true,
+    },
+  });
+
+  res.send({
+    clientSecret: paymentIntent.client_secret,
+  });
+});
+
+
 
 //DATABASE connection
 main().catch((err) => console.log(err));

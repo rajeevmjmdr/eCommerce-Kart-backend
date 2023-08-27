@@ -14,7 +14,8 @@ exports.createOrder = async (req, res) => {
 exports.getOrdersByUser = async (req, res) => {
   const { id } = req.user;
   try {
-    const orders = await Order.find({ user: id });
+    //orders in decending order
+    const orders = await Order.find({ user: id }).sort({"_id":-1});
     res.status(200).json(orders);
   } catch (err) {
     res.status(400).json(err);

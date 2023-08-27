@@ -41,7 +41,7 @@ exports.checkAuth = async (req, res) => {
   if(req.user){
     res.json(req.user);
   }else{
-    res.status(401)
+    res.status(401).json("unAuthorized");
   }
   
 };
