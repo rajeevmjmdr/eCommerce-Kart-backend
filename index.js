@@ -21,6 +21,7 @@ const { User } = require("./model/User");
 const crypto = require("crypto");
 const { sanatizeUser, isAuth , cookieExtractor} = require("./services/Common");
 const morgan = require("morgan");
+const path = require("path");
 
 //Webhook
 // This is your Stripe CLI webhook secret for testing your endpoint locally.
@@ -85,7 +86,7 @@ opts.jwtFromRequest = cookieExtractor;
 opts.secretOrKey = process.env.SECRET_KEY;
 
 //middleware
-//server.use(express.static('build'));
+server.use(express.static(path.resolve(__dirname,'build')));
 
 //Using Third-party Middleware -Morgan
 
