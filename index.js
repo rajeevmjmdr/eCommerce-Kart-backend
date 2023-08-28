@@ -22,12 +22,13 @@ const crypto = require("crypto");
 const { sanatizeUser, isAuth , cookieExtractor} = require("./services/Common");
 const morgan = require("morgan");
 const path = require("path");
+const { Order } = require("./model/Order");
 
 //Webhook
 // This is your Stripe CLI webhook secret for testing your endpoint locally.
 const endpointSecret = process.env.ENDPOINT_SECRET;
 
-server.post('/webhook', express.raw({type: 'application/json'}), (request, response) => {
+server.post('/webhook', express.raw({type: 'application/json'}), async (request, response) => {
   const sig = request.headers['stripe-signature'];
 
   let event;
@@ -72,6 +73,9 @@ server.post('/webhook', express.raw({type: 'application/json'}), (request, respo
     case 'payment_intent.succeeded':
       const paymentIntentSucceeded = event.data.object;
       // Then define and call a function to handle the event payment_intent.succeeded
+      const order = await Order.findById(paymentIntentSucceeded.metadata.orderId);
+      order.paymentStatus = "received";
+      await order.save();
       break;
     // ... handle other event types
     default:
@@ -197,12 +201,15 @@ passport.deserializeUser(function (user, cb) {
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 server.post("/create-payment-intent", async (req, res) => {
-  const { totalAmount } = req.body;
+  const { totalAmount,orderId } = req.body;
 
   // Create a PaymentIntent with the order amount and currency
   const paymentIntent = await stripe.paymentIntents.create({
     amount: totalAmount*100,
     currency: "inr",
+    metadata: {
+       orderId
+    },
     // In the latest version of the API, specifying the `automatic_payment_methods` parameter is optional because Stripe enables its functionality by default.
     automatic_payment_methods: {
       enabled: true,
