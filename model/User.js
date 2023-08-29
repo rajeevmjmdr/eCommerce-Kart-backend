@@ -26,6 +26,10 @@ const userSchema = new Schema({
     type: Buffer,
     required: true,
   },
+  resetPasswordToken:{
+    type: String,
+    default:''
+  }
 });
 
 const virtual = userSchema.virtual("id");
