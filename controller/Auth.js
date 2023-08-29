@@ -46,6 +46,16 @@ exports.loginUser = async (req, res) => {
     .json(req.user.token);
 };
 
+exports.logout = async (req, res) => {
+  res
+    .cookie("jwt", null, {
+      expires: new Date(Date.now()),
+      httpOnly: true,
+    })
+    .status(200)
+    .json({data:'Logout success'});
+};
+
 exports.checkAuth = async (req, res) => {
   if (req.user) {
     res.json(req.user);
